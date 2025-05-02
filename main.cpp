@@ -133,9 +133,6 @@ void PrintNode(Node *head) {
 }
 
 
-
-
-
 int main() {
 
     Node *head = CreatHead();
