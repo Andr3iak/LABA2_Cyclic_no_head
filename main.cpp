@@ -132,20 +132,95 @@ void PrintNode(Node *head) {
     cout << "HEAD\n";
 }
 
+// Андрей 1:
+void InsertAfter(Node** head, int i, int data, const string& inf) {
+    int count = CountNode(*head);
+    if (i<0) {
+        cout << "Uncorrect number" <<endl;
+        return;
+    }
+    if (i > count) {
+        AddEnd(head, data, inf);
+        return;
+    }
 
-int main() {
+    Node* NewNode = new Node;
+    NewNode->data = data;
+    NewNode->inf = inf;
+
+    Node * temp = (*head)->next;
+    for (int i = 0; i < count; i++ ) {
+        temp -> next;
+    }
+    NewNode->next = temp->next;
+    temp->next = NewNode;
+    NewNode->prev = temp;
+    temp->next->prev = NewNode;
+}
+
+
+// Егор 6:
+void include_instead_the_key (Node **head, unsigned int new_data, const string new_inf) {
+    Node *current = (*head)->next;
+    // unsigned int new_data;
+    while (current != *head) {
+        if (current->data == new_data) {
+            // cin >> new_inf >> new_data;
+            auto *new_node = new Node{new_data, new_inf, current->next, current->prev};
+            current->prev->next = new_node;
+            current->next->prev = new_node;
+            delete current;
+            return;
+        }
+        current = current->next;
+    }
+}
+
+// Соня:
+void InsertBefore(Node** head, int i, int data, const string& inf) {
+    if (i <= 0 || !*head) {
+        AddStart(head, data, inf);
+        return;
+    }
+    int count = CountNode(*head);
+    if (i >= count) {
+        AddEnd(head, data, inf);
+        return;
+    }
+    Node* current = *head;
+    for (int pos = 0; pos < i; pos++) {
+        current = current->next;
+    }
+    Node* NewNode = new Node;
+    NewNode->data = data;
+    NewNode->inf = inf;
+    NewNode->next = current;
+    NewNode->prev = current->prev;
+
+    current->prev->next = NewNode;
+    current->prev = NewNode;
+
+
+    if (current == *head && i == 0) {
+        *head = NewNode;
+    }
+}
+
+
+int  main() {
 
     Node *head = CreatHead();
     AddStart(&head, 2, "First");
-    AddStart(&head, 15, "Second");
-    AddStart(&head, 1412, "Third");
+    AddEnd(&head, 15, "Second");
+    AddEnd(&head, 1412, "Third");
     PrintNode(head);
     cout << CountNode(head) << endl;
     // DeleteStart(&head);
-    DeleteEnd(&head);
-    PrintNode(head);
-    cout << CountNode(head) << endl;
-    DeleteAll(&head);
+    // DeleteEnd(&head);
+    // PrintNode(head);
+    // cout << CountNode(head) << endl;
+    // DeleteAll(&head);
+    include_instead_the_key(&head, 1, "adfasd");
     PrintNode(head);
 
     return 0;
