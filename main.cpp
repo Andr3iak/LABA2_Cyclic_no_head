@@ -15,7 +15,7 @@ using namespace std;
 
 
 struct Node{
-    unsigned int data;
+    unsigned int key;
     string inf;
     Node* next;
     Node* prev;
@@ -25,32 +25,46 @@ Node* CreatHead() {
     return nullptr;
 };
 
-void AddStart(Node** head, int data, const string &inf) {
-    Node* NewNode = new Node(data, inf, nullptr, nullptr);
+void AddStart(Node** head, int p_key, const string &p_inf) {
+    Node* newNode = new Node;
+    newNode->key = p_key;
+    newNode->inf = p_inf;
+    newNode->next = nullptr;
+    newNode->prev = nullptr;
+
     if (!*head) {
-        NewNode->next = NewNode->prev = NewNode;
-        *head = NewNode;
-    }
-    else {
-        Node* temp = (*head)->prev;
-        NewNode -> next = *head;
-        temp -> next = NewNode;
-        (*head)->prev = NewNode;
-        NewNode -> prev = temp;
-        *head = NewNode;
+        newNode->next = newNode;
+        newNode->prev = newNode;
+        *head = newNode;
+    } else {
+        Node* last = (*head)->prev;
+
+        newNode->next = *head;
+        newNode->prev = last;
+
+        last->next = newNode;
+        (*head)->prev = newNode;
+
+        *head = newNode;
     }
 }
 
-void AddEnd(Node** head, int data, const string &inf) {
-    Node* NewNode = new Node(data, inf, nullptr, nullptr);
+void AddEnd(Node** head, int p_key, const string &p_inf) {
+    Node* NewNode = new Node;
+    NewNode->key = p_key;
+    NewNode->inf = p_inf;
+    NewNode->next = nullptr;
+    NewNode->prev = nullptr;
+
     if (!*head) {
         NewNode -> next = NewNode->prev = NewNode;
+        *head = NewNode;
     }
+
     else {
         NewNode -> next = *head;
-        Node* temp = (*head)->prev;
-        NewNode -> prev = temp;
-        temp -> next = NewNode;
+        NewNode -> prev = (*head)->prev;
+        (*head)->prev->next = NewNode;
         (*head)->prev = NewNode;
     }
 }
@@ -125,7 +139,7 @@ void PrintNode(Node *head) {
     Node* temp = head;
     cout << "HEAD <-> ";
     do {
-        cout << "K: " << temp->data << "; Inf: " << temp->inf << " <-> ";
+        cout << "K: " << temp->key << "; Inf: " << temp->inf << " <-> ";
         temp = temp->next;
     }
     while (temp != head);
@@ -133,66 +147,95 @@ void PrintNode(Node *head) {
 }
 
 // Андрей 1:
-void InsertAfter(Node** head, int i, int data, const string& inf) {
+void InsertAfter(Node** head, int i, int p_key, const string& p_inf) {
+    if (i < 0) {
+        cout << "Uncorrect number" << endl;
+        return;
+    }
+
     int count = CountNode(*head);
-    if (i<0) {
-        cout << "Uncorrect number" <<endl;
-        return;
-    }
-    if (i > count) {
-        AddEnd(head, data, inf);
+
+    if (!*head && i == 0) {
+        AddStart(head, p_key, p_inf);
         return;
     }
 
-    Node* NewNode = new Node;
-    NewNode->data = data;
-    NewNode->inf = inf;
-
-    Node * temp = (*head)->next;
-    for (int i = 0; i < count; i++ ) {
-        temp -> next;
+    // Если индекс больше или равен количеству — вставка в конец
+    if (i >= count) {
+        AddEnd(head, p_key, p_inf);
+        return;
     }
-    NewNode->next = temp->next;
-    temp->next = NewNode;
-    NewNode->prev = temp;
-    temp->next->prev = NewNode;
+
+    Node* temp = *head;
+    for (int n = 0; n < i; n++) {
+        temp = temp->next;
+    }
+
+    Node* newNode = new Node;
+    newNode->key = p_key;
+    newNode->inf = p_inf;
+    newNode->next = temp->next;
+    newNode->prev = temp;
+
+    temp->next->prev = newNode;
+    temp->next = newNode;
 }
-
 
 // Егор 6:
-void include_instead_the_key (Node **head, unsigned int new_data, const string new_inf) {
-    Node *current = (*head)->next;
-    // unsigned int new_data;
-    while (current != *head) {
-        if (current->data == new_data) {
-            // cin >> new_inf >> new_data;
-            auto *new_node = new Node{new_data, new_inf, current->next, current->prev};
+void Include_instead_the_key (Node **head, unsigned int a_key, unsigned int b_key, const string &new_inf) {
+
+    if (!head || !*head)
+        return;
+
+    Node* current = *head;
+
+    do {
+        if (current->key == a_key) {
+            Node* new_node = new Node;
+            new_node->key = b_key;
+            new_node->inf = new_inf;
+            new_node->prev = current->prev;
+            new_node->next = current->next;
+
             current->prev->next = new_node;
             current->next->prev = new_node;
-            delete current;
-            return;
+            if (current == *head) {
+                *head = new_node;
+            }
+            Node* to_delete = current;
+            current = current->next;
+            delete to_delete;
+        } else {
+            current = current->next;
         }
-        current = current->next;
-    }
+    } while (current != *head);
+
 }
 
-// Соня:
-void InsertBefore(Node** head, int i, int data, const string& inf) {
-    if (i <= 0 || !*head) {
-        AddStart(head, data, inf);
+// Соня :
+void InsertBefore(Node** head, int i, int key, const string& inf) {
+    if (!head || i < 0) {
+        cout << "Uncorrect number" << endl;
         return;
     }
     int count = CountNode(*head);
-    if (i >= count) {
-        AddEnd(head, data, inf);
+    // Вставка в начало
+    if (i == 0 || !*head) {
+        AddStart(head, key, inf);
         return;
     }
+    // Вставка в конец
+    if (i >= count) {
+        AddEnd(head, key, inf);
+        return;
+    }
+    // Вставка в середину
     Node* current = *head;
     for (int pos = 0; pos < i; pos++) {
         current = current->next;
     }
     Node* NewNode = new Node;
-    NewNode->data = data;
+    NewNode->key = key;
     NewNode->inf = inf;
     NewNode->next = current;
     NewNode->prev = current->prev;
@@ -200,9 +243,34 @@ void InsertBefore(Node** head, int i, int data, const string& inf) {
     current->prev->next = NewNode;
     current->prev = NewNode;
 
-
-    if (current == *head && i == 0) {
+    // Если вставка перед головой — обновить head
+    if (current == *head) {
         *head = NewNode;
+    }
+}
+
+//Петя:
+void Zamena(Node** head, int elem, int new_key, const string new_inf) {
+
+    if (!*head) {
+        return;
+    }
+    if (elem<1) {
+        cout << "Uncorrect number" <<endl;
+        return;
+    }
+    int count = CountNode(*head);
+    if (elem > count) {
+        cout << "Uncorrect number" << endl;
+        return;
+    }
+    else {
+        Node * temp = (*head);
+        for (int i=1; i < elem; i++) {
+            temp = temp->next;
+        }
+        temp->key = new_key;
+        temp->inf = new_inf;
     }
 }
 
@@ -213,15 +281,20 @@ int  main() {
     AddStart(&head, 2, "First");
     AddEnd(&head, 15, "Second");
     AddEnd(&head, 1412, "Third");
+    AddEnd(&head, 13, "Fourth");
+    AddEnd(&head, 72, "Fifth");
     PrintNode(head);
-    cout << CountNode(head) << endl;
-    // DeleteStart(&head);
-    // DeleteEnd(&head);
-    // PrintNode(head);
+    // cout << CountNode(head) << endl;
+
+    InsertAfter(&head, 2, 0, "NEW");
+    // Include_instead_the_key(&head, 13, 9999, "NEW_2");
+    // InsertBefore(&head, 1, -2222, "NEW_3");
+    // Zamena(&head, 2, 1, "NEW_4");
+    PrintNode(head);
+
     // cout << CountNode(head) << endl;
     // DeleteAll(&head);
-    include_instead_the_key(&head, 1, "adfasd");
-    PrintNode(head);
+    // PrintNode(head);
 
     return 0;
 }
